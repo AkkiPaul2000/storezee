@@ -1,26 +1,20 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
-import Navbar from './components/Navbar';
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import ProductList from './components/ProductList';
+import CartPage from './components/CartPage';
 
-function App() {
-    const [count, setCount] = useState(0);
-
+const App = () => {
     return (
-        <>
-            <div
-                style={{
-                    backgroundColor: 'red',
-                    height: '100vh',
-                    width: '100vw',
-                }}
-            >
-                <Navbar />
-                Here is my page
+        <Router>
+            <div>
+                <Switch>
+                    <Route path="/" exact component={ProductList} />
+                    <Route path="/cart" component={CartPage} />
+                </Switch>
             </div>
-        </>
+        </Router>
     );
-}
+};
 
 export default App;

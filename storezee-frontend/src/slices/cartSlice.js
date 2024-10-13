@@ -2,66 +2,48 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Fetch the cart from the API
-export const fetchCart = createAsyncThunk(
-    'cart/fetchCart',
-    async (token, { rejectWithValue }) => {
-        try {
-            const response = await axios.get('/api/cart', {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            return response.data; // Assuming API returns cart data
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
-    }
-);
+// Fetch the user's cart from the backend
+export const fetchCart = createAsyncThunk('cart/fetchCart', async token => {
+    const response = await axios.get('/api/cart', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+});
 
 // Add item to cart
 export const addItemToCart = createAsyncThunk(
     'cart/addItemToCart',
-    async ({ productId, quantity }, { getState, rejectWithValue }) => {
+    async ({ productId, quantity }, { getState }) => {
         const token = getState().auth.token;
-        try {
-            const response = await axios.post(
-                '/api/cart/add',
-                {
-                    productId,
-                    quantity,
+        const response = await axios.post(
+            '/api/cart/add',
+            {
+                productId,
+                quantity,
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
                 },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            return response.data; // Assuming API returns updated cart data
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
+            }
+        );
+        return response.data;
     }
 );
 
 // Remove item from cart
 export const removeItemFromCart = createAsyncThunk(
     'cart/removeItemFromCart',
-    async (productId, { getState, rejectWithValue }) => {
+    async (productId, { getState }) => {
         const token = getState().auth.token;
-        try {
-            const response = await axios.delete(
-                `/api/cart/remove/${productId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            );
-            return response.data; // Assuming API returns updated cart data
-        } catch (error) {
-            return rejectWithValue(error.response.data);
-        }
+        const response = await axios.delete(`/api/cart/remove/${productId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response.data;
     }
 );
 
@@ -80,17 +62,17 @@ const cartSlice = createSlice({
             })
             .addCase(fetchCart.fulfilled, (state, action) => {
                 state.loading = false;
-                state.items = action.payload.items; // Assuming API returns `items` array
+                state.items = action.payload.items;
             })
             .addCase(fetchCart.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload;
+                state.error = action.error.message;
             })
             .addCase(addItemToCart.fulfilled, (state, action) => {
-                state.items = action.payload.items; // Update with the latest cart items
+                state.items = action.payload.items;
             })
             .addCase(removeItemFromCart.fulfilled, (state, action) => {
-                state.items = action.payload.items; // Update with the latest cart items
+                state.items = action.payload.items;
             });
     },
 });

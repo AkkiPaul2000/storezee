@@ -29,7 +29,7 @@ exports.addItemToCart = async (req, res) => {
 
         if (cart) {
             const itemIndex = cart.items.findIndex(
-                item => item.productId == productId
+                item => item.productId.toString() === productId
             );
             if (itemIndex > -1) {
                 cart.items[itemIndex].quantity += quantity;
@@ -63,11 +63,16 @@ exports.addItemToCart = async (req, res) => {
 // Remove item from cart
 exports.removeItemFromCart = async (req, res) => {
     try {
-        let cart = await Cart.findOne({
+        const cart = await Cart.findOne({
             user: req.user.id,
         });
+        if (!cart)
+            return res.status(404).json({
+                message: 'Cart not found',
+            });
+
         cart.items = cart.items.filter(
-            item => item.productId != req.params.productId
+            item => item.productId.toString() !== req.params.productId
         );
         await cart.save();
         res.json(cart);
